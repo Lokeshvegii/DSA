@@ -8,5 +8,11 @@ class Solution:
             for j in range(i + 1, n):
                 matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
             
-        for k in matrix:
-            k.reverse()
+        for k in range (n):
+            l = 0
+            r = n-1
+            while l < r:
+                matrix[k][l], matrix[k][r] = matrix[k][r], matrix[k][l]
+                r -= 1
+                l += 1
+        
