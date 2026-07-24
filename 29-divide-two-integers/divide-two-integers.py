@@ -18,6 +18,6 @@ class Solution:
                 multiple <<= 1
             dividend -= temp
             quotient += multiple
-        return -(quotient) if negative else quotient 
+        return -quotient if negative else quotient 
         
         
