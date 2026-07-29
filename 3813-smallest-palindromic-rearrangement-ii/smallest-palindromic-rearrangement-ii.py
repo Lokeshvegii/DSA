@@ -1,47 +1,44 @@
 class Solution:
     def smallestPalindrome(self, s: str, k: int) -> str:
-        f = Counter(s)
-
-        h = {}
-        mid = ""
-
-        for ch, cnt in f.items():
-            h[ch] = cnt // 2
-            if cnt % 2:
-                mid = ch
-        
-        def count_permutations(cnt):
-            total = sum(cnt.values())
-            res = 1
-            rem = total
-            for x in cnt.values():
-                if x:
-                    res *= comb(rem, x)
-                    rem -= x
-                    if res >= k:
-                        return res
-            return res
-
-        if count_permutations(h) < k:
+        import collections, math
+        n = len(s)
+        ans = [""] * n
+        count = collections.Counter(s[: n // 2])
+        if n & 1:
+            ans[n // 2] = s[n // 2]
+        tot = 0
+        ways = 1
+        i = 0
+        for c in sorted(count, reverse=True):
+            tot += count[c]
+            ways *= math.comb(tot, count[c])
+            if ways > k:
+                for c2 in sorted(count):
+                    if c2 >= c:
+                        break
+                    for loops in range(count[c2]):
+                        ans[i] = ans[~i] = c2
+                        i += 1
+                    count[c2] = 0
+        ways = 1
+        tot = sum(count.values())
+        for ch in sorted(count):
+            ways *= math.comb(tot, count[ch])
+            tot -= count[ch]
+        if ways < k:
             return ""
-
-        left = []
-        length = len(s) // 2
-
-        for _ in range(length):
-            for ch in map(chr, range(ord('a'), ord('z') + 1)):
-                if h.get(ch, 0) == 0:
-                    continue
-
-                h[ch] -= 1
-                ways = count_permutations(h)
-
-                if ways >= k:
-                    left.append(ch)
-                    break
-
-                k -= ways
-                h[ch] += 1
-
-        left = "".join(left)
-        return left + mid + left[::-1]
+        tot = sum(count.values())
+        while tot:
+            for c in sorted(count):
+                if count[c]:
+                    ways2 = ways * count[c] // tot
+                    if ways2 < k:
+                        k -= ways2
+                    else:
+                        ans[i] = ans[~i] = c
+                        i += 1
+                        ways = ways2
+                        count[c] -= 1
+                        tot -= 1
+                        break
+        return "".join(ans)
