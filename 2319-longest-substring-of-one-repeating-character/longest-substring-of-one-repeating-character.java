@@ -1,96 +1,90 @@
 class Solution {
 
-    int size;
-    int[] pre, suf, max;
-    char[] left, right;
+    static class Node {
+        int pre = 0;
+        int suf = 0;
+        int maxLen = 0;
+        char leftChar = 0;
+        char rightChar = 0;
 
-    private void pull(int p) {
-        int l = p << 1;
-        int r = l | 1;
-
-        left[p] = left[l];
-        right[p] = right[r];
-
-        pre[p] = pre[l];
-        if (pre[l] == sizeOf(l) && right[l] == left[r]) {
-            pre[p] += pre[r];
-        }
-
-        suf[p] = suf[r];
-        if (suf[r] == sizeOf(r) && right[l] == left[r]) {
-            suf[p] += suf[l];
-        }
-
-        max[p] = Math.max(max[l], max[r]);
-
-        if (right[l] == left[r]) {
-            max[p] = Math.max(max[p], suf[l] + pre[r]);
+        Node() {}
+        Node(int pre, int suf, int maxLen, char leftChar, char rightChar) {
+            this.pre = pre;
+            this.suf = suf;
+            this.maxLen = maxLen;
+            this.leftChar = leftChar;
+            this.rightChar = rightChar;
         }
     }
 
-    private int sizeOf(int p) {
-        int level = 31 - Integer.numberOfLeadingZeros(p);
-        return size >> level;
+    int n;
+    Node[] segTree;
+
+    Node merge(Node L, Node R, int leftLen, int rightLen) {
+        Node res = new Node();
+
+        res.leftChar = L.leftChar;
+        res.rightChar = R.rightChar;
+
+        res.pre = L.pre;
+        if(L.pre == leftLen && L.rightChar == R.leftChar) {
+            res.pre = L.pre + R.pre;
+        }
+
+        res.suf = R.suf;
+        if(R.suf == rightLen && L.rightChar == R.rightChar) {
+            res.suf = L.suf + R.suf;
+        }
+
+        res.maxLen = Math.max(L.maxLen, R.maxLen);
+        if(L.rightChar == R.leftChar) {
+            res.maxLen = Math.max(res.maxLen, L.suf + R.pre);
+        }
+
+        return res;
     }
 
-    public int[] longestRepeating(
-            String s,
-            String queryCharacters,
-            int[] queryIndices) {
-
-        int n = s.length();
-
-        size = 1;
-        while (size < n) {
-            size <<= 1;
+    void buildSegmentTree(int i, int l, int r, String s) {
+        if(l == r) {
+            segTree[i] = new Node(1, 1, 1, s.charAt(l), s.charAt(l));
+            return;
         }
 
-        int total = size << 1;
+        int mid = l + (r - l) / 2;
+        buildSegmentTree(2 * i + 1, l, mid, s);
+        buildSegmentTree(2 * i + 2, mid + 1, r, s);
+        segTree[i] = merge(segTree[2 * i + 1], segTree[2 * i + 2], mid - l + 1, r - mid);
+    }
 
-        pre = new int[total];
-        suf = new int[total];
-        max = new int[total];
-        left = new char[total];
-        right = new char[total];
-
-
-        for (int i = 0; i < n; i++) {
-            int p = size + i;
-
-            pre[p] = 1;
-            suf[p] = 1;
-            max[p] = 1;
-            left[p] = s.charAt(i);
-            right[p] = s.charAt(i);
+    void update(int i, int l, int r, int pos, char ch) {
+        if(l == r) {
+            segTree[i] = new Node(1, 1, 1, ch, ch);
+            return;
         }
 
-        for (int p = size - 1; p > 0; p--) {
-            pull(p);
+        int mid = l + (r - l) / 2;
+        if(pos <= mid) {
+            update(2 * i + 1, l, mid, pos, ch);
+        }else {
+            update(2 * i + 2, mid + 1, r, pos, ch);
         }
+        segTree[i] = merge(segTree[2 * i + 1], segTree[2 * i + 2], mid - l + 1, r - mid);
+    }
 
-        int q = queryIndices.length;
-        int[] ans = new int[q];
+        public int[] longestRepeating(String s, String queryCharacters, int[] queryIndices) {
+            n = s.length();
+            segTree = new Node[4 * n];
+            buildSegmentTree(0, 0, n - 1, s);
+            int k = queryIndices.length;
 
-        for (int i = 0; i < q; i++) {
-
-            int pos = queryIndices[i];
-            char ch = queryCharacters.charAt(i);
-
-            int p = size + pos;
-
-            pre[p] = 1;
-            suf[p] = 1;
-            max[p] = 1;
-            left[p] = ch;
-            right[p] = ch;
-
-            for (p >>= 1; p > 0; p >>= 1) {
-                pull(p);
+            int[] result = new int[k];
+            for(int i = 0; i < k; i++) {
+                int pos = queryIndices[i];
+                char ch = queryCharacters.charAt(i);
+                update(0, 0, n - 1, pos, ch);
+                result[i] = segTree[0].maxLen;
             }
 
-            ans[i] = max[1];
-        }
-
-        return ans;
+            return result;
     }
 }
