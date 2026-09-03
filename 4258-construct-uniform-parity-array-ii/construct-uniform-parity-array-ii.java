@@ -1,16 +1,16 @@
 class Solution {
     public boolean uniformArray(int[] nums1) {
-        int minOdd = Integer.MAX_VALUE;
+        int mini = Integer.MAX_VALUE;
         for (int x : nums1){
-            if (x % 2 == 1) minOdd = Math.min(minOdd, x);
+            mini = Math.min(mini, x);
         }
 
-        if( minOdd == Integer.MAX_VALUE) return true;
+        if( mini % 2 == 1) return true;
 
         for(int x : nums1) {
-            if((x % 2 == 0) && (x < minOdd)) return false;
+            if(x % 2 == 1) return false;
         }
-        
+
         return true;
     }
 }
