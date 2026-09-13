@@ -1,41 +1,36 @@
-import java.util.*;
-
 class Solution {
-    public int largestOverlap(int[][] img1, int[][] img2) {
-        int n = img1.length;
-
-        List<int[]> ones1 = new ArrayList<>();
-        List<int[]> ones2 = new ArrayList<>();
-
-        for (int r = 0; r < n; r++) {
-            for (int c = 0; c < n; c++) {
-                if (img1[r][c] == 1) {
-                    ones1.add(new int[]{r, c});
-                }
-
-                if (img2[r][c] == 1) {
-                    ones2.add(new int[]{r, c});
-                }
+    public int largestOverlap(int[][] A, int[][] B) {
+        int[] aLeftSlide = makeArray(A), aRightSlide = aLeftSlide.clone(), b = makeArray(B);
+        int maxOverlap = maxOverlapUpDownSlide(aLeftSlide, b);
+        for (int i = 0; i < A.length; i++) {
+            for (int j = 0; j < A.length; j++) {
+                aLeftSlide[j] <<= 1;
+                aRightSlide[j] >>= 1;
+            }
+            maxOverlap = Math.max(maxOverlap, maxOverlapUpDownSlide(aLeftSlide, b));
+            maxOverlap = Math.max(maxOverlap, maxOverlapUpDownSlide(aRightSlide, b));
+        }
+        return maxOverlap;
+    }
+    private int[] makeArray(int[][] matrix) {
+        int[] array = new int[matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                if (matrix[i][j] == 1) array[i] |= (1 << j); // set bit
             }
         }
-
-        Map<Long, Integer> map = new HashMap<>();
-        int answer = 0;
-
-        for (int[] a : ones1) {
-            for (int[] b : ones2) {
-                int dr = b[0] - a[0];
-                int dc = b[1] - a[1];
-
-                long key = ((long) dr << 32) | (dc & 0xffffffffL);
-
-                int frequency = map.getOrDefault(key, 0) + 1;
-                map.put(key, frequency);
-
-                answer = Math.max(answer, frequency);
+        return array;
+    }
+    private int maxOverlapUpDownSlide(int a[], int[] b) {
+        int maxOverlap = 0;
+        for (int i = 0; i < a.length; i++) {
+            int overlapUp = 0, overlapDown = 0;
+            for (int row = i; row < a.length; row++) {
+                overlapUp += Integer.bitCount(a[row] & b[row - i]);
+                overlapDown += Integer.bitCount(a[row - i] & b[row]);
             }
+            maxOverlap = Math.max(maxOverlap, Math.max(overlapUp, overlapDown));
         }
-
-        return answer;
+        return maxOverlap;
     }
 }
