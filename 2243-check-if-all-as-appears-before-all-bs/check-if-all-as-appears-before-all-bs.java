@@ -1,10 +1,10 @@
 class Solution {
     public boolean checkString(String s) {
-        int count = 0;
+        int la = -1, fb = s.length();
         for(int i = 0; i < s.length(); i++) {
-            if(s.charAt(i) == 'b') count = 1;
-            if(s.charAt(i) == 'a' && count == 1) return false;
+            if(s.charAt(i) == 'a') la = i;
+            if(s.charAt(i) == 'b' && fb == s.length()) fb = i;
         }
-        return true;
+        return la < fb;
     }
 }
