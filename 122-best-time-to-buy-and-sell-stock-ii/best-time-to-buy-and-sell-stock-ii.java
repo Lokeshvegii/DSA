@@ -8,9 +8,16 @@ class Solution {
         //     }
         // }
         // return profit;
-        int[][] dp = new int[n][2];
-        for(int[] row : dp) Arrays.fill(row, -1);
-        return solve(0, 1, prices, n, dp);
+        int[][] dp = new int[n + 1][2];
+        // for(int[] row : dp) Arrays.fill(row, -1);
+        // return solve(0, 1, prices, n, dp);
+        for(int i = n - 1; i >= 0; i--) {
+            for(int b = 0; b <= 1; b++) {
+                if(b == 1) dp[i][b] = Math.max(dp[i + 1][0] - prices[i], dp[i + 1][1]);
+                else dp[i][b] = Math.max(dp[i + 1][1] + prices[i], dp[i + 1][0]);
+            }
+        }
+        return dp[0][1];
     }
     private int solve(int id, int buy, int[] a, int n, int[][] dp) {
         if(id == n) return 0;
