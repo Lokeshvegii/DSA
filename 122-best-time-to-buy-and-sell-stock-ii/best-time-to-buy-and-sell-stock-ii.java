@@ -19,14 +19,4 @@ class Solution {
         }
         return dp[0][1];
     }
-    private int solve(int id, int buy, int[] a, int n, int[][] dp) {
-        if(id == n) return 0;
-        if(dp[id][buy] != -1) return dp[id][buy];
-        if(buy == 1) {
-            dp[id][buy] = Math.max(solve(id + 1, 0, a, n, dp) - a[id], solve(id + 1, 1, a, n, dp));
-        } else {
-        dp[id][buy] = Math.max(solve(id + 1, 1, a, n, dp) + a[id], solve(id + 1, 0, a, n, dp));
-        }
-        return dp[id][buy];
-    }
 }
